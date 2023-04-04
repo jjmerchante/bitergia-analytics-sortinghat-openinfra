@@ -26,8 +26,8 @@ $ pip install sortinghat-openinfra
 
 To install from the source code you will need to clone the repository first:
 ```
-$ git clone https://github.com/bitergia-analytics/bitergia-analytics-sortinghat-openinfra
-$ cd bitergia-analytics-sortinghat-openinfra
+$ git clone https://github.com/bitergia-analytics/sortinghat-openinfra
+$ cd sortinghat-openinfra
 ```
 
 Then use pip or Poetry to install the package along with its dependencies.
