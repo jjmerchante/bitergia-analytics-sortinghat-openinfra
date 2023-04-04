@@ -3,14 +3,14 @@ name = "sortinghat-openinfra"
 version = "0.1.0"
 description = "SortingHat backend to import identities from OpenInfraID"
 authors = [
-    "GrimoireLab Developers"
+    "Bitergia Developers"
 ]
 license = "GPL-3.0+"
 
 readme = "README.md"
 
 homepage = "https://chaoss.github.io/grimoirelab/"
-repository = "https://github.com/bitergia-analytics/bitergia-analytics-sortinghat-openinfra"
+repository = "https://github.com/bitergia-analytics/sortinghat-openinfra"
 
 keywords = [
     "development",
@@ -33,7 +33,7 @@ classifiers = [
 ]
 
 [tool.poetry.urls]
-"Bug Tracker" = "https://github.com/bitergia-analytics/bitergia-analytics-sortinghat-openinfra/issues"
+"Bug Tracker" = "https://github.com/bitergia-analytics/sortinghat-openinfra/issues"
 
 [tool.poetry.dependencies]
 python = "^3.7.1"
