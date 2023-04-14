@@ -25,14 +25,17 @@ import os
 
 import httpretty
 from dateutil.tz import tzutc
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 
 from sortinghat.core.context import SortingHatContext
 from sortinghat.core.importer.backends.openinfra import OpenInfraIDImporter, OpenInfraIDParser
 
 OPENINFRA_URL = 'https://openstackid-resources.openstack.org'
-OPENINFRA_MEMBERS_URL = OPENINFRA_URL + '/api/public/v1/members'
+OPENINFRA_PRIVATE_MEMBERS_URL = OPENINFRA_URL + '/api/v1/members'
+OPENINFRA_PUBLIC_MEMBERS_URL = OPENINFRA_URL + '/api/public/v1/members'
+
+ERROR_OPENINFRA_NOT_CONFIGURED = 'Client ID or Secret are not defined in settings for OpenInfraIDParser'
 
 
 def read_file(filename, mode='r'):
@@ -41,7 +44,7 @@ def read_file(filename, mode='r'):
     return content
 
 
-def setup_mock_server():
+def setup_mock_server(public):
     """Configure a Mock server"""
 
     def request_callback(request, uri, headers):
@@ -51,11 +54,16 @@ def setup_mock_server():
         return [200, headers, body]
 
     requests = []
-    bodies = [read_file('data/openinfra_page_1.json'),
-              read_file('data/openinfra_page_2.json')]
+    if public:
+        members_url = OPENINFRA_PUBLIC_MEMBERS_URL
+        bodies = [read_file('data/openinfra_page_1.json'),
+                  read_file('data/openinfra_page_2.json')]
+    else:
+        members_url = OPENINFRA_PRIVATE_MEMBERS_URL
+        bodies = [read_file('data/openinfra_private.json')]
 
     httpretty.register_uri(httpretty.GET,
-                           OPENINFRA_MEMBERS_URL,
+                           members_url,
                            responses=[
                                httpretty.Response(body=request_callback)
                                for _ in bodies
@@ -109,16 +117,31 @@ class TestOpenInfraParser(TestCase):
         parser = OpenInfraIDParser(OPENINFRA_URL)
         self.assertEqual(parser.url, OPENINFRA_URL)
         self.assertEqual(parser.source, 'openinfra')
+        self.assertEqual(parser.client_id, None)
+        self.assertEqual(parser.client_secret, None)
+        self.assertEqual(parser.private_api, False)
+
+    @override_settings(OPENINFRA_CLIENT_ID='id_test', OPENINFRA_CLIENT_SECRET='secret_test')
+    def test_private_initialization(self):
+        """Test whether attribute are initialized with private API"""
+
+        parser = OpenInfraIDParser(OPENINFRA_URL)
+        self.assertEqual(parser.url, OPENINFRA_URL)
+        self.assertEqual(parser.source, 'openinfra')
+        self.assertEqual(parser.client_id, 'id_test')
+        self.assertEqual(parser.client_secret, 'secret_test')
+        self.assertEqual(parser.private_api, True)
 
     @httpretty.activate
     def test_fetch_items(self):
         """Test whether fetch items returns paginated items"""
 
         # Set up a mock HTTP server
-        requests, bodies = setup_mock_server()
+        requests, bodies = setup_mock_server(public=True)
 
         # Run fetch items
-        raw_items = OpenInfraIDParser.fetch_items(OPENINFRA_MEMBERS_URL)
+        parser = OpenInfraIDParser(OPENINFRA_URL)
+        raw_items = parser.fetch_items(OPENINFRA_PUBLIC_MEMBERS_URL)
         items = [item for item in raw_items]
         self.assertEqual(len(items), 2)
         self.assertDictEqual(items[0], json.loads(bodies[0]))
@@ -132,18 +155,19 @@ class TestOpenInfraParser(TestCase):
         self.assertEqual(len(requests), 2)
         for i, req in enumerate(requests):
             self.assertDictEqual(req.querystring, expected_qs[i])
-            self.assertEqual(req.url.split('?')[0], OPENINFRA_MEMBERS_URL)
+            self.assertEqual(req.url.split('?')[0], OPENINFRA_PUBLIC_MEMBERS_URL)
 
     @httpretty.activate
     def test_fetch_items_with_payload(self):
         """Test whether fetch items from date returns paginated items"""
 
         # Set up a mock HTTP server
-        requests, bodies = setup_mock_server()
+        requests, bodies = setup_mock_server(public=True)
 
         # Run fetch items
         payload = {OpenInfraIDParser.PSORT: '-last_edited'}
-        raw_items = OpenInfraIDParser.fetch_items(OPENINFRA_MEMBERS_URL, payload=payload)
+        parser = OpenInfraIDParser(OPENINFRA_URL)
+        raw_items = parser.fetch_items(OPENINFRA_PUBLIC_MEMBERS_URL, payload=payload)
 
         items = [item for item in raw_items]
         self.assertEqual(len(items), 2)
@@ -158,14 +182,14 @@ class TestOpenInfraParser(TestCase):
         self.assertEqual(len(requests), 2)
         for i, req in enumerate(requests):
             self.assertDictEqual(req.querystring, expected_qs[i])
-            self.assertEqual(req.url.split('?')[0], OPENINFRA_MEMBERS_URL)
+            self.assertEqual(req.url.split('?')[0], OPENINFRA_PUBLIC_MEMBERS_URL)
 
     @httpretty.activate
     def test_fetch_members(self):
         """Test whether fetch_members returns members"""
 
         # Set up a mock HTTP server
-        requests, bodies = setup_mock_server()
+        requests, bodies = setup_mock_server(public=True)
 
         # Run fetch members
         parser = OpenInfraIDParser(OPENINFRA_URL)
@@ -181,14 +205,44 @@ class TestOpenInfraParser(TestCase):
         self.assertEqual(len(requests), 2)
         for i, req in enumerate(requests):
             self.assertDictEqual(req.querystring, expected_qs[i])
-            self.assertEqual(req.url.split('?')[0], OPENINFRA_MEMBERS_URL)
+            self.assertEqual(req.url.split('?')[0], OPENINFRA_PUBLIC_MEMBERS_URL)
+
+    @httpretty.activate
+    @override_settings(OPENINFRA_CLIENT_ID='id_test', OPENINFRA_CLIENT_SECRET='secret_test')
+    def test_fetch_members_private(self):
+        """Test whether fetch_members for private API returns members"""
+
+        # Set up a mock HTTP server
+        requests, bodies = setup_mock_server(public=False)
+
+        httpretty.register_uri(
+            httpretty.POST,
+            OpenInfraIDParser.OPENINFRA_TOKEN_URL,
+            body='{"access_token":"test_token","expires_in":7200,"token_type":"Bearer"}',
+            status=200
+        )
+
+        # Run fetch members
+        parser = OpenInfraIDParser(OPENINFRA_URL)
+        members = [member for member in parser.fetch_members()]
+
+        self.assertEqual(len(members), 3)
+
+        # Check requests
+        expected_qs = [
+            {'page': ['1'], 'per_page': ['100'], 'sort': ['-last_edited'], 'access_token': ['test_token']}
+        ]
+        self.assertEqual(len(requests), 1)
+        for i, req in enumerate(requests):
+            self.assertDictEqual(req.querystring, expected_qs[i])
+            self.assertEqual(req.url.split('?')[0], OPENINFRA_PRIVATE_MEMBERS_URL)
 
     @httpretty.activate
     def test_fetch_members_from_date(self):
         """Test whether fetch_members returns members from a given date"""
 
         # Set up a mock HTTP server
-        requests, bodies = setup_mock_server()
+        requests, bodies = setup_mock_server(public=True)
 
         # Run fetch members
         parser = OpenInfraIDParser(OPENINFRA_URL)
@@ -215,14 +269,40 @@ class TestOpenInfraParser(TestCase):
         self.assertEqual(len(requests), 2)
         for i, req in enumerate(requests):
             self.assertDictEqual(req.querystring, expected_qs[i])
-            self.assertEqual(req.url.split('?')[0], OPENINFRA_MEMBERS_URL)
+            self.assertEqual(req.url.split('?')[0], OPENINFRA_PUBLIC_MEMBERS_URL)
+
+    @httpretty.activate
+    @override_settings(OPENINFRA_CLIENT_ID='id_test', OPENINFRA_CLIENT_SECRET='secret_test')
+    def test_create_access_token(self):
+        """Test if the access token is created"""
+
+        httpretty.register_uri(
+            httpretty.POST,
+            OpenInfraIDParser.OPENINFRA_TOKEN_URL,
+            body='{"access_token":"test_token","expires_in":7200,"token_type":"Bearer"}',
+            status=200
+        )
+
+        parser = OpenInfraIDParser(OPENINFRA_URL)
+        token = parser._create_access_token()
+
+        self.assertEqual(token, "test_token")
+
+        request = httpretty.last_request()
+        self.assertEqual(request.body, b'client_id=id_test&client_secret=secret_test')
+        self.assertEqual(request.url.split('?')[0], 'https://id.openinfra.dev/oauth2/token')
+        expected_qs = {
+            'grant_type': ['client_credentials'],
+            'scope': ['https://openstackid-resources.openstack.org/members/read']
+        }
+        self.assertEqual(request.querystring, expected_qs)
 
     @httpretty.activate
     def test_fetch_individuals(self):
         """Test fetch_individuals returns individuals"""
 
         # Set up a mock HTTP server
-        requests, bodies = setup_mock_server()
+        requests, bodies = setup_mock_server(public=True)
 
         # Run fetch individuals
         parser = OpenInfraIDParser(OPENINFRA_URL)
@@ -234,9 +314,11 @@ class TestOpenInfraParser(TestCase):
         indiv = individuals[0]
         self.assertEqual(indiv.uuid, 136832)
         self.assertEqual(indiv.profile.name, "name surname")
+        self.assertEqual(indiv.profile.email, None)
         self.assertEqual(indiv.profile.is_bot, False)
         self.assertEqual(indiv.identities[0].source, "openinfra")
         self.assertEqual(indiv.identities[0].name, "name surname")
+        self.assertEqual(indiv.identities[0].email, None)
         self.assertEqual(indiv.identities[0].username, "136832")
         self.assertEqual(indiv.identities[1].source, "github")
         self.assertEqual(indiv.identities[1].name, "name surname")
@@ -245,17 +327,21 @@ class TestOpenInfraParser(TestCase):
         indiv = individuals[1]
         self.assertEqual(indiv.uuid, 136853)
         self.assertEqual(indiv.profile.name, None)
+        self.assertEqual(indiv.profile.email, None)
         self.assertEqual(indiv.profile.is_bot, False)
         self.assertEqual(indiv.identities[0].source, "github")
-        self.assertEqual(indiv.identities[0].name, "")
+        self.assertEqual(indiv.identities[0].name, None)
+        self.assertEqual(indiv.identities[0].email, None)
         self.assertEqual(indiv.identities[0].username, "random-gh-user-2")
 
         indiv = individuals[2]
         self.assertEqual(indiv.uuid, 125525)
         self.assertEqual(indiv.profile.name, "name_3 last_name_3")
+        self.assertEqual(indiv.profile.email, None)
         self.assertEqual(indiv.profile.gender, None)
         self.assertEqual(indiv.identities[0].source, "openinfra")
         self.assertEqual(indiv.identities[0].name, "name_3 last_name_3")
+        self.assertEqual(indiv.identities[0].email, None)
         self.assertEqual(indiv.identities[0].username, "125525")
         self.assertEqual(indiv.enrollments[0].start,
                          datetime.datetime(2020, 9, 1, tzinfo=tzutc()))
@@ -264,10 +350,96 @@ class TestOpenInfraParser(TestCase):
 
         # Check requests
         expected_qs = [
-            {'page': ['1'], 'per_page': ['100'], 'sort': ['-last_edited']},
-            {'page': ['2'], 'per_page': ['100'], 'sort': ['-last_edited']}
+            {
+                'page': ['1'],
+                'per_page': ['100'],
+                'sort': ['-last_edited']
+            },
+            {
+                'page': ['2'],
+                'per_page': ['100'],
+                'sort': ['-last_edited']
+            }
         ]
         self.assertEqual(len(requests), 2)
         for i, req in enumerate(requests):
             self.assertDictEqual(req.querystring, expected_qs[i])
-            self.assertEqual(req.url.split('?')[0], OPENINFRA_MEMBERS_URL)
+            self.assertEqual(req.url.split('?')[0], OPENINFRA_PUBLIC_MEMBERS_URL)
+
+    @httpretty.activate
+    @override_settings(OPENINFRA_CLIENT_ID='id_test', OPENINFRA_CLIENT_SECRET='secret_test')
+    def test_fetch_private_individuals(self):
+        """Test fetch_individuals returns individuals"""
+
+        # Set up a mock HTTP server
+        requests, bodies = setup_mock_server(public=False)
+
+        httpretty.register_uri(
+            httpretty.POST,
+            OpenInfraIDParser.OPENINFRA_TOKEN_URL,
+            body='{"access_token":"test_token","expires_in":7200,"token_type":"Bearer"}',
+            status=200
+        )
+
+        # Run fetch individuals
+        parser = OpenInfraIDParser(OPENINFRA_URL)
+        individuals = [indiv for indiv in parser.individuals()]
+
+        # Not all individuals have valid information (name or GitHub username)
+        self.assertEqual(len(individuals), 3)
+
+        indiv = individuals[0]
+        self.assertEqual(indiv.uuid, 136832)
+        self.assertEqual(indiv.profile.name, "name surname")
+        self.assertEqual(indiv.profile.email, "email_1@example.com")
+        self.assertEqual(indiv.profile.is_bot, False)
+        self.assertEqual(indiv.identities[0].source, "openinfra")
+        self.assertEqual(indiv.identities[0].name, "name surname")
+        self.assertEqual(indiv.identities[0].email, "email_1@example.com")
+        self.assertEqual(indiv.identities[0].username, "136832")
+        self.assertEqual(indiv.identities[1].source, "github")
+        self.assertEqual(indiv.identities[1].name, "name surname")
+        self.assertEqual(indiv.identities[0].email, "email_1@example.com")
+        self.assertEqual(indiv.identities[1].username, "random-gh-user")
+
+        indiv = individuals[1]
+        self.assertEqual(indiv.uuid, 136853)
+        self.assertEqual(indiv.profile.name, None)
+        self.assertEqual(indiv.profile.email, "email_2@example.com")
+        self.assertEqual(indiv.profile.is_bot, False)
+        self.assertEqual(indiv.identities[0].source, "openinfra")
+        self.assertEqual(indiv.identities[0].name, None)
+        self.assertEqual(indiv.identities[0].email, "email_2@example.com")
+        self.assertEqual(indiv.identities[0].username, "136853")
+        self.assertEqual(indiv.identities[1].source, "github")
+        self.assertEqual(indiv.identities[1].name, None)
+        self.assertEqual(indiv.identities[1].email, "email_2@example.com")
+        self.assertEqual(indiv.identities[1].username, "random-gh-user-2")
+
+        indiv = individuals[2]
+        self.assertEqual(indiv.uuid, 125525)
+        self.assertEqual(indiv.profile.name, "name_3 last_name_3")
+        self.assertEqual(indiv.profile.email, "email_3@example.com")
+        self.assertEqual(indiv.profile.gender, None)
+        self.assertEqual(indiv.identities[0].source, "openinfra")
+        self.assertEqual(indiv.identities[0].name, "name_3 last_name_3")
+        self.assertEqual(indiv.identities[0].email, "email_3@example.com")
+        self.assertEqual(indiv.identities[0].username, "125525")
+        self.assertEqual(indiv.enrollments[0].start,
+                         datetime.datetime(2020, 9, 1, tzinfo=tzutc()))
+        self.assertEqual(indiv.enrollments[0].end, None)
+        self.assertEqual(indiv.enrollments[0].organization.name, "Technology Org")
+
+        # Check requests
+        expected_qs = [
+            {
+                'page': ['1'],
+                'per_page': ['100'],
+                'sort': ['-last_edited'],
+                'access_token': ['test_token']
+            }
+        ]
+        self.assertEqual(len(requests), 1)
+        for i, req in enumerate(requests):
+            self.assertDictEqual(req.querystring, expected_qs[i])
+            self.assertEqual(req.url.split('?')[0], OPENINFRA_PRIVATE_MEMBERS_URL)

@@ -24,6 +24,7 @@ import logging
 
 import dateutil.tz
 import requests
+from django.conf import settings
 
 from grimoirelab_toolkit.datetime import str_to_datetime
 from grimoirelab_toolkit.uris import urijoin
@@ -65,24 +66,31 @@ class OpenInfraIDParser:
     enrollments.
 
     :param url: OpenInfraID API URL
-    :param last_update: datetime of the last update in UTC format
 
     :raises InvalidFormatError: raised when the format of the stream is
         not valid.
     """
 
+    OPENINFRA_TOKEN_URL = 'https://id.openinfra.dev/oauth2/token'
+
     # API path
-    MEMBERS = '/api/public/v1/members'
+    MEMBERS_PUBLIC = '/api/public/v1/members'
+    MEMBERS_PRIVATE = '/api/v1/members'
 
     # Resource parameters
     PPER_PAGE = 'per_page'
     PPAGE = 'page'
     PSORT = 'sort'
     PFILTER = 'filter'
+    PTOKEN = 'access_token'
 
     def __init__(self, url):
         self.url = url
         self.source = 'openinfra'
+        self.client_id = getattr(settings, 'OPENINFRA_CLIENT_ID', None)
+        self.client_secret = getattr(settings, 'OPENINFRA_CLIENT_SECRET', None)
+        self.private_api = all([self.client_id, self.client_secret])
+        self.access_token = None
 
     def individuals(self, from_date=None):
         """Fetch individuals from the OpenInfraID API
@@ -103,21 +111,24 @@ class OpenInfraIDParser:
         for member in self.fetch_members(from_date):
             uuid = member.get('id')
             name = f"{member.get('first_name', '')} {member.get('last_name', '')}".strip()
+            name = name if name else None
             github_user = member.get('github_user')
+            email = member.get('email')
             affiliations = member.get('affiliations', [])
-            if not name and not github_user:
+            if not name and not github_user and not email:
                 # Skip individuals that can't be identified in SH
                 logger.warning("Skip empty individual")
                 continue
             individual = Individual(uuid=uuid)
             prf = Profile()
+            prf.email = email
+            prf.name = name
             individual.profile = prf
-            if name:
-                idt = Identity(source=self.source, name=name, username=str(uuid))
+            if name or email:
+                idt = Identity(source=self.source, name=name, username=str(uuid), email=email)
                 individual.identities.append(idt)
-                prf.name = name
             if github_user:
-                idt = Identity(source='github', name=name, username=github_user)
+                idt = Identity(source='github', name=name, username=github_user, email=email)
                 individual.identities.append(idt)
 
             for aff in affiliations:
@@ -153,15 +164,22 @@ class OpenInfraIDParser:
         if from_date:
             payload[self.PFILTER] = 'last_edited>' + str(int(from_date.timestamp()))
 
-        url = urijoin(self.url, self.MEMBERS)
+        if self.private_api:
+            if not self.access_token:
+                self.access_token = self._create_access_token()
+            payload[self.PTOKEN] = self.access_token
+            members_path = self.MEMBERS_PRIVATE
+        else:
+            members_path = self.MEMBERS_PUBLIC
+
+        url = urijoin(self.url, members_path)
 
         raw_members = self.fetch_items(url, payload)
         for members in raw_members:
             for member in members['data']:
                 yield member
 
-    @staticmethod
-    def fetch_items(url, payload=None):
+    def fetch_items(self, url, payload=None):
         """Return items using pagination"""
 
         if not payload:
@@ -169,14 +187,37 @@ class OpenInfraIDParser:
 
         page = 1
         while True:
-            response = requests.get(url, params=payload)
-            if not response.ok:
-                raise LoadError(cause=f"Error fetching items. Status code <{response.status_code}>")
+            r = requests.get(url, params=payload)
+            if self.private_api and r.status_code == '400' and r.json()['error'] == 'invalid_token':
+                logger.warning(r.json()['description'])
+                self.access_token = self._create_access_token()
+                payload[self.PTOKEN] = self.access_token
+                continue
+            elif not r.ok:
+                raise LoadError(cause=f"Error fetching items. Status code <{r.status_code}>")
 
-            data = response.json()
+            data = r.json()
             yield data
 
             if page >= data['last_page']:
                 break
             page += 1
             payload['page'] = page
+
+    def _create_access_token(self):
+        """Create OpenInfra access token."""
+
+        params = {
+            'grant_type': 'client_credentials',
+            'scope': 'https://openstackid-resources.openstack.org/members/read'
+        }
+        data = {
+            'client_id': self.client_id,
+            'client_secret': self.client_secret
+        }
+
+        r = requests.post(url=self.OPENINFRA_TOKEN_URL, data=data, params=params)
+        if not r.ok:
+            raise LoadError(cause="OpenInfra token can't be created.")
+        access_token = r.json()['access_token']
+        return access_token
