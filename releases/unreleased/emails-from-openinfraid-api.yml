@@ -1,0 +1,10 @@
+---
+title: Emails from OpenInfraID API
+category: added
+author: Jose Javier Merchante <jjmerchante@bitergia.com>
+issue: null
+notes: >
+  Obtain emails from OpenInfraID private API using custom
+  Oauth client ID and secret. To enable this feature define
+  `OPENINFRA_CLIENT_ID` and `OPENINFRA_CLIENT_SECRET` in
+  SortingHat settings file.

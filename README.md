@@ -42,6 +42,19 @@ In case you are a developer, you should install sortinghat-openinfra in editable
 $ pip install -e .
 ```
 
+## Usage
+
+Install this SortingHat backend to import identities from OpenInfraID. You can
+use this importer using the API or the UI. The name of the backend is 
+`OpenInfraID`. You need to provide the URL in the importer configuration,
+typically `https://openstackid-resources.openstack.org`.
+
+By default, this backend only obtain members from the public API that doesn't
+contain email information. If you want to obtain members emails you need
+to define the following configuration variables in your settings file:
+- `OPENINFRA_CLIENT_ID`: OpenInfraID Oauth2 client ID for private API.
+- `OPENINFRA_CLIENT_SECRET`: OpenInfraID Oauth2 client secret for private API.
+
 #### Poetry
 We use [poetry](https://python-poetry.org/) for dependency management and 
 packaging. You can install it following its [documentation](https://python-poetry.org/docs/#installation).
