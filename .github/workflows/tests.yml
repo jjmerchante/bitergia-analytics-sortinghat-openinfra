@@ -55,4 +55,4 @@ jobs:
         poetry run flake8
     - name: Tests
       run: |
-        poetry run python manage.py test --settings=config.testing
+        poetry run python manage.py test --settings=config.settings.testing
