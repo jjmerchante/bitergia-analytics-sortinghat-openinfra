@@ -1,0 +1,11 @@
+# Releases
+
+## SortingHat OpenInfraID 0.1.0 - (2023-04-24)
+
+**New features:**
+
+ * Emails from OpenInfraID API\
+   Obtain emails from OpenInfraID private API using custom Oauth client
+   ID and secret. To enable this feature define `OPENINFRA_CLIENT_ID` and
+   `OPENINFRA_CLIENT_SECRET` in SortingHat settings file.
+

@@ -64,8 +64,8 @@ jobs:
       - name: Test package
         run: |
           PACKAGE=`(cd dist && ls *whl)` && echo $PACKAGE
-          pip install --pre ./dist/$PACKAGE
-          python manage.py test --settings=config.settings.testing
+          poetry run pip install --pre ./dist/$PACKAGE
+          poetry run python manage.py test --settings=config.settings.testing
 
   release:
     needs: [tests]
