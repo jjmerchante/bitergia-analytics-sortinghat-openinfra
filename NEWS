@@ -1,5 +1,13 @@
 # Releases
 
+## SortingHat OpenInfraID 0.1.2 - (2023-05-02)
+
+**Dependencies updateds:**
+
+ * SortingHat 0.9.3 support\
+   SortingHat 0.9.3 is now supported by the OpenInfraID backend.
+
+
 ## SortingHat OpenInfraID 0.1.1 - (2023-04-27)
 
 **Dependencies updateds:**
