@@ -40,6 +40,7 @@ python = "^3.7.1"
 
 sortinghat = { version = ">=0.8.1", allow-prereleases = true}
 grimoirelab-toolkit = { version = ">=0.3", allow-prereleases = true}
+django-rq = "2.7.0"
 
 [tool.poetry.group.dev.dependencies]
 httpretty = "^1.1.4"
