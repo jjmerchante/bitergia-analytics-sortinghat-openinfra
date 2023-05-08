@@ -80,7 +80,7 @@ class OpenInfraIDParser:
     # Resource parameters
     PPER_PAGE = 'per_page'
     PPAGE = 'page'
-    PSORT = 'sort'
+    PSORT = 'order'
     PFILTER = 'filter'
     PTOKEN = 'access_token'
 
@@ -157,7 +157,7 @@ class OpenInfraIDParser:
         """
         payload = {
             self.PPER_PAGE: 100,
-            self.PSORT: '-last_edited',
+            self.PSORT: 'last_edited',
             self.PPAGE: 1,
         }
 
@@ -202,7 +202,7 @@ class OpenInfraIDParser:
             if page >= data['last_page']:
                 break
             page += 1
-            payload['page'] = page
+            payload[self.PPAGE] = page
 
     def _create_access_token(self):
         """Create OpenInfra access token."""
@@ -219,5 +219,5 @@ class OpenInfraIDParser:
         r = requests.post(url=self.OPENINFRA_TOKEN_URL, data=data, params=params)
         if not r.ok:
             raise LoadError(cause="OpenInfra token can't be created.")
-        access_token = r.json()['access_token']
+        access_token = r.json()[self.PTOKEN]
         return access_token

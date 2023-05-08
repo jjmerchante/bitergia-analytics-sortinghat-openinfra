@@ -165,7 +165,7 @@ class TestOpenInfraParser(TestCase):
         requests, bodies = setup_mock_server(public=True)
 
         # Run fetch items
-        payload = {OpenInfraIDParser.PSORT: '-last_edited'}
+        payload = {OpenInfraIDParser.PSORT: 'last_edited'}
         parser = OpenInfraIDParser(OPENINFRA_URL)
         raw_items = parser.fetch_items(OPENINFRA_PUBLIC_MEMBERS_URL, payload=payload)
 
@@ -176,8 +176,8 @@ class TestOpenInfraParser(TestCase):
 
         # Check requests
         expected_qs = [
-            {'sort': ['-last_edited']},
-            {'sort': ['-last_edited'], 'page': ['2']}
+            {'order': ['last_edited']},
+            {'order': ['last_edited'], 'page': ['2']}
         ]
         self.assertEqual(len(requests), 2)
         for i, req in enumerate(requests):
@@ -199,8 +199,8 @@ class TestOpenInfraParser(TestCase):
 
         # Check requests
         expected_qs = [
-            {'page': ['1'], 'per_page': ['100'], 'sort': ['-last_edited']},
-            {'page': ['2'], 'per_page': ['100'], 'sort': ['-last_edited']}
+            {'page': ['1'], 'per_page': ['100'], 'order': ['last_edited']},
+            {'page': ['2'], 'per_page': ['100'], 'order': ['last_edited']}
         ]
         self.assertEqual(len(requests), 2)
         for i, req in enumerate(requests):
@@ -230,7 +230,7 @@ class TestOpenInfraParser(TestCase):
 
         # Check requests
         expected_qs = [
-            {'page': ['1'], 'per_page': ['100'], 'sort': ['-last_edited'], 'access_token': ['test_token']}
+            {'page': ['1'], 'per_page': ['100'], 'order': ['last_edited'], 'access_token': ['test_token']}
         ]
         self.assertEqual(len(requests), 1)
         for i, req in enumerate(requests):
@@ -256,13 +256,13 @@ class TestOpenInfraParser(TestCase):
             {
                 'page': ['1'],
                 'per_page': ['100'],
-                'sort': ['-last_edited'],
+                'order': ['last_edited'],
                 'filter': ['last_edited>946684800']
             },
             {
                 'page': ['2'],
                 'per_page': ['100'],
-                'sort': ['-last_edited'],
+                'order': ['last_edited'],
                 'filter': ['last_edited>946684800']
             }
         ]
@@ -353,12 +353,12 @@ class TestOpenInfraParser(TestCase):
             {
                 'page': ['1'],
                 'per_page': ['100'],
-                'sort': ['-last_edited']
+                'order': ['last_edited']
             },
             {
                 'page': ['2'],
                 'per_page': ['100'],
-                'sort': ['-last_edited']
+                'order': ['last_edited']
             }
         ]
         self.assertEqual(len(requests), 2)
@@ -435,7 +435,7 @@ class TestOpenInfraParser(TestCase):
             {
                 'page': ['1'],
                 'per_page': ['100'],
-                'sort': ['-last_edited'],
+                'order': ['last_edited'],
                 'access_token': ['test_token']
             }
         ]
