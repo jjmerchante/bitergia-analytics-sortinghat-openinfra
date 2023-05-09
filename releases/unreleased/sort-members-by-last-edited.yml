@@ -1,8 +1,0 @@
----
-title: Sort members by last edited
-category: fixed
-author: Jose Javier Merchante <jjmerchante@bitergia.com>
-issue: null
-notes: >
-  Query to members API was using the wrong keyword to sort
-  the items. Use order keyword instead of sort.
