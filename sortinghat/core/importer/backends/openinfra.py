@@ -187,9 +187,10 @@ class OpenInfraIDParser:
 
         page = 1
         while True:
+            logger.info(f"Fetching next members from API {payload}")
             r = requests.get(url, params=payload)
-            if self.private_api and r.status_code == '400' and r.json()['error'] == 'invalid_token':
-                logger.warning(r.json()['description'])
+            if self.private_api and r.status_code == 401 and r.json()['error'] == 'invalid_token':
+                logger.warning(r.json())
                 self.access_token = self._create_access_token()
                 payload[self.PTOKEN] = self.access_token
                 continue
