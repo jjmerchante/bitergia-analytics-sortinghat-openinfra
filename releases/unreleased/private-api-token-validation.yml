@@ -1,9 +1,0 @@
----
-title: Private API token validation
-category: fixed
-author: Jose Javier Merchante <jjmerchante@bitergia.com>
-issue: null
-notes: |
-  The previous code incorrectly compared the status code against '400'
-  instead of '401' when validating the private API token. As a result,
-  unauthorized access was not properly handled.
