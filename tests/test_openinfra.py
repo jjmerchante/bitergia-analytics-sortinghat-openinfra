@@ -298,6 +298,86 @@ class TestOpenInfraParser(TestCase):
         self.assertEqual(request.querystring, expected_qs)
 
     @httpretty.activate
+    @override_settings(OPENINFRA_CLIENT_ID='id_test', OPENINFRA_CLIENT_SECRET='secret_test')
+    def test_fetch_items_invalid_token(self):
+        """Test whether fetch items with invalid token generates a new token"""
+
+        # Set up a mock HTTP server
+        body_error = read_file('data/openinfra_token_error.json')
+        body_members = read_file('data/openinfra_private.json')
+
+        responses = [
+            httpretty.Response(body=body_error,
+                               status=401),
+            httpretty.Response(body=body_members),
+        ]
+
+        httpretty.register_uri(httpretty.GET,
+                               OPENINFRA_PRIVATE_MEMBERS_URL,
+                               responses=responses)
+        httpretty.register_uri(
+            httpretty.POST,
+            OpenInfraIDParser.OPENINFRA_TOKEN_URL,
+            body='{"access_token":"test_token","expires_in":7200,"token_type":"Bearer"}',
+            status=200
+        )
+
+        # Run fetch items
+        parser = OpenInfraIDParser(OPENINFRA_URL)
+
+        payload = {
+            OpenInfraIDParser.PPER_PAGE: 100,
+            OpenInfraIDParser.PSORT: 'last_edited',
+            OpenInfraIDParser.PPAGE: 1,
+            OpenInfraIDParser.PTOKEN: 'wrong_token'
+        }
+        raw_items = parser.fetch_items(OPENINFRA_PRIVATE_MEMBERS_URL, payload=payload)
+
+        items = [item for item in raw_items]
+        self.assertEqual(len(items), 1)
+        self.assertDictEqual(items[0], json.loads(body_members))
+
+        # Check requests
+        requests = httpretty.latest_requests()
+
+        expected_requests = [
+            {
+                "body": "",
+                "querystring": {'access_token': ['wrong_token'], 'order': ['last_edited'],
+                            'page': ['1'], 'per_page': ['100']},
+                "method": 'GET',
+                "url": OPENINFRA_PRIVATE_MEMBERS_URL
+            },
+            {
+                "body": {'client_id': ['id_test'], 'client_secret': ['secret_test']},
+                "querystring": {'grant_type': ['client_credentials'],
+                            'scope': ['https://openstackid-resources.openstack.org/members/read']},
+                "method": 'POST',
+                "url": "https://id.openinfra.dev/oauth2/token"
+            },
+            {
+                "body": {'client_id': ['id_test'], 'client_secret': ['secret_test']},
+                "querystring": {'grant_type': ['client_credentials'],
+                            'scope': ['https://openstackid-resources.openstack.org/members/read']},
+                "method": 'POST',
+                "url": "https://id.openinfra.dev/oauth2/token"
+            },
+            {
+                "body": "",
+                "querystring": {'access_token': ['test_token'], 'order': ['last_edited'],
+                                'page': ['1'], 'per_page': ['100']},
+                "method": 'GET',
+                "url": OPENINFRA_PRIVATE_MEMBERS_URL
+            }
+        ]
+        self.assertEqual(len(requests), 4)
+        for i, req in enumerate(requests):
+            self.assertDictEqual(req.querystring, expected_requests[i]["querystring"])
+            self.assertEqual(req.url.split('?')[0], expected_requests[i]["url"])
+            self.assertEqual(req.parsed_body, expected_requests[i]["body"])
+            self.assertEqual(req.method, expected_requests[i]["method"])
+
+    @httpretty.activate
     def test_fetch_individuals(self):
         """Test fetch_individuals returns individuals"""
 
