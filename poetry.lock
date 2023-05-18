@@ -323,14 +323,14 @@ grpcio-gcp = ["grpcio-gcp (>=0.2.2,<1.0dev)"]
 
 [[package]]
 name = "google-auth"
-version = "2.17.3"
+version = "2.18.0"
 description = "Google Authentication Library"
 category = "main"
 optional = false
 python-versions = ">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,!=3.5.*"
 files = [
-    {file = "google-auth-2.17.3.tar.gz", hash = "sha256:ce311e2bc58b130fddf316df57c9b3943c2a7b4f6ec31de9663a9333e4064efc"},
-    {file = "google_auth-2.17.3-py2.py3-none-any.whl", hash = "sha256:f586b274d3eb7bd932ea424b1c702a30e0393a2e2bc4ca3eae8263ffd8be229f"},
+    {file = "google-auth-2.18.0.tar.gz", hash = "sha256:c66b488a8b005b23ccb97b1198b6cece516c91869091ac5b7c267422db2733c7"},
+    {file = "google_auth-2.18.0-py2.py3-none-any.whl", hash = "sha256:ef3f3a67fa54d421a1c155864570f9a8de9179cedc937bda496b7a8ca338e936"},
 ]
 
 [package.dependencies]
@@ -338,6 +338,7 @@ cachetools = ">=2.0.0,<6.0"
 pyasn1-modules = ">=0.2.1"
 rsa = {version = ">=3.1.4,<5", markers = "python_version >= \"3.6\""}
 six = ">=1.9.0"
+urllib3 = "<2.0"
 
 [package.extras]
 aiohttp = ["aiohttp (>=3.6.2,<4.0.0dev)", "requests (>=2.20.0,<3.0.0dev)"]
@@ -1148,14 +1149,14 @@ files = [
 
 [[package]]
 name = "sortinghat"
-version = "0.9.3"
+version = "0.10.0"
 description = "A tool to manage identities."
 category = "main"
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "sortinghat-0.9.3-py3-none-any.whl", hash = "sha256:a14c429a6da00e7c76adb04207d9a8c3b84928e77da87aa26881cd7cd5399a59"},
-    {file = "sortinghat-0.9.3.tar.gz", hash = "sha256:cdd0435632f481f26b39258f93996b88ee674dc4b461069e015204fad90e740f"},
+    {file = "sortinghat-0.10.0-py3-none-any.whl", hash = "sha256:b5add14027f76a75d222b2810d250a365c6bfd46d17dd2cf55a91bccf6a404e4"},
+    {file = "sortinghat-0.10.0.tar.gz", hash = "sha256:9001b2310db0b153d01e1a8f137a495f8769c642e07339d73e0ec32f1cae7ff5"},
 ]
 
 [package.dependencies]
@@ -1166,6 +1167,7 @@ django-graphql-jwt = ">=0.3.0,<0.4.0"
 django-rq = ">=2.3.2,<3.0.0"
 django-storages = {version = ">=1.13.2,<2.0.0", extras = ["google"]}
 django-treebeard = ">=4.5.1,<5.0.0"
+google-auth = ">=2.18.0,<3.0.0"
 graphene-django = ">=2.15,<3.0"
 grimoirelab-toolkit = ">=0.3"
 importlib-resources = ">=5.2.0,<6.0.0"
