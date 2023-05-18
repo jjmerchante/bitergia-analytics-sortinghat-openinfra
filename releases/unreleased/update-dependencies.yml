@@ -1,0 +1,8 @@
+---
+title: Update dependencies
+category: dependency
+author: Santiago Dueñas <sduenas@bitergia.com>
+issue: null
+notes: >
+  Dependencies have been updated to support
+  SortingHat 0.10.0.
