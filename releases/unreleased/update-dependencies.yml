@@ -1,8 +1,0 @@
----
-title: Update dependencies
-category: dependency
-author: Santiago Dueñas <sduenas@bitergia.com>
-issue: null
-notes: >
-  Include new versions of sortinghat, google-auth,
-  and django as dependencies.

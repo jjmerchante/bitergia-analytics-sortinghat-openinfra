@@ -1,5 +1,14 @@
 # Releases
 
+## SortingHat OpenInfraID 0.1.5 - (2023-05-18)
+
+**Dependencies updateds:**
+
+ * Update dependencies\
+   Include new versions of sortinghat, google-auth, and django as
+   dependencies.
+
+
 ## SortingHat OpenInfraID 0.1.4 - (2023-05-11)
 
 **Bug fixes:**
