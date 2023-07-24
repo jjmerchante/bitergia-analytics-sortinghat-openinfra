@@ -1,7 +1,0 @@
----
-title: Update dependencies
-category: dependency
-author: Jose Javier Merchante <jjmerchante@bitergia.com>
-issue: null
-notes: |
-  Dependencies updated to support GrimoireLab 0.13.0.
