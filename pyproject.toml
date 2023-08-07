@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sortinghat-openinfra"
-version = "0.1.9"
+version = "0.1.10"
 description = "SortingHat backend to import identities from OpenInfraID"
 authors = [
     "Bitergia Developers"
