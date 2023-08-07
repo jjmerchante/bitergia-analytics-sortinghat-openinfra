@@ -470,13 +470,13 @@ requests = ["requests (>=2.18.0,<3.0.0dev)"]
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.59.1"
+version = "1.60.0"
 description = "Common protobufs used in Google APIs"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "googleapis-common-protos-1.59.1.tar.gz", hash = "sha256:b35d530fe825fb4227857bc47ad84c33c809ac96f312e13182bdeaa2abe1178a"},
-    {file = "googleapis_common_protos-1.59.1-py2.py3-none-any.whl", hash = "sha256:0cbedb6fb68f1c07e18eb4c48256320777707e7d0c55063ae56c15db3224a61e"},
+    {file = "googleapis-common-protos-1.60.0.tar.gz", hash = "sha256:e73ebb404098db405ba95d1e1ae0aa91c3e15a71da031a2eeb6b2e23e7bc3708"},
+    {file = "googleapis_common_protos-1.60.0-py2.py3-none-any.whl", hash = "sha256:69f9bbcc6acde92cab2db95ce30a70bd2b81d20b12eff3f1aabaffcbe8a93918"},
 ]
 
 [package.dependencies]
@@ -1097,13 +1097,13 @@ files = [
 
 [[package]]
 name = "sortinghat"
-version = "0.12.0"
+version = "0.13.0"
 description = "A tool to manage identities."
 optional = false
 python-versions = ">=3.7.1,<4.0.0"
 files = [
-    {file = "sortinghat-0.12.0-py3-none-any.whl", hash = "sha256:b5c2b06cd49fd4f8bf975dbe1ae9694b36eb925468cefb5baabf2bf39f2a434c"},
-    {file = "sortinghat-0.12.0.tar.gz", hash = "sha256:d9f41feb1ab3d700ca179beaf74379a62d24eb7cce010d9cfa71a85e40b57262"},
+    {file = "sortinghat-0.13.0-py3-none-any.whl", hash = "sha256:2df4ffa7ca15fd1f678e0736010aed200cdecb42d1ea3e6d59a6847c80a75e6e"},
+    {file = "sortinghat-0.13.0.tar.gz", hash = "sha256:9f9dc7d0e1bb8689d084cb336da9f20f3669344a9d40b9646e969824c6aba82d"},
 ]
 
 [package.dependencies]
@@ -1186,12 +1186,12 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 
 [[package]]
 name = "uwsgi"
-version = "2.0.21"
+version = "2.0.22"
 description = "The uWSGI server"
 optional = false
 python-versions = "*"
 files = [
-    {file = "uwsgi-2.0.21.tar.gz", hash = "sha256:35a30d83791329429bc04fe44183ce4ab512fcf6968070a7bfba42fc5a0552a9"},
+    {file = "uwsgi-2.0.22.tar.gz", hash = "sha256:4cc4727258671ac5fa17ab422155e9aaef8a2008ebb86e4404b66deaae965db2"},
 ]
 
 [[package]]
