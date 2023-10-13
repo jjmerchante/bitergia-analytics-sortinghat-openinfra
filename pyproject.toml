@@ -36,7 +36,7 @@ classifiers = [
 "Bug Tracker" = "https://github.com/bitergia-analytics/sortinghat-openinfra/issues"
 
 [tool.poetry.dependencies]
-python = "^3.7.1"
+python = "^3.8"
 
 sortinghat = { version = ">=0.8.1", allow-prereleases = true}
 grimoirelab-toolkit = { version = ">=0.3", allow-prereleases = true}
