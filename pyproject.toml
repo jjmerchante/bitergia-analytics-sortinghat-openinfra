@@ -41,6 +41,8 @@ python = "^3.8"
 sortinghat = { version = ">=0.8.1", allow-prereleases = true}
 grimoirelab-toolkit = { version = ">=0.3", allow-prereleases = true}
 
+charset-normalizer = "3.3.0"
+
 [tool.poetry.group.dev.dependencies]
 httpretty = "^1.1.4"
 flake8 = "^4.0.1"
