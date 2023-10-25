@@ -1,7 +1,8 @@
 ---
-title: Pin charset-normalized dependency
+title: Pin charset-normalized and cachetools dependencies
 category: dependency
 author: null
 issue: null
 notes: >
   Pin charset-normalized package to be aligned with Perceval version.
+  Pin cachetools package to be aligned with sortinghat version.
