@@ -143,6 +143,12 @@ class OpenInfraIDParser:
                 enr = Enrollment(org, start=start, end=end)
                 individual.enrollments.append(enr)
 
+            if not individual.enrollments:
+                company = member.get('company', None)
+                if company:
+                    enr = Enrollment(company)
+                    individual.enrollments.append(enr)
+
             yield individual
 
     def fetch_members(self, from_date=None):
