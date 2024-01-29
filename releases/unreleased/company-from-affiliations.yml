@@ -1,0 +1,8 @@
+---
+title: Company as affiliation
+category: fixed
+author: Jose Javier Merchante <jjmerchante@bitergia.com>
+issue: null
+notes: >
+  Include the company field in individual enrollments when affiliations
+  are not defined and there is a company specified.
