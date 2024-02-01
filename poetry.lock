@@ -268,13 +268,13 @@ sftp = ["paramiko (>=1.15)"]
 
 [[package]]
 name = "django-treebeard"
-version = "4.7"
+version = "4.7.1"
 description = "Efficient tree implementations for Django"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "django-treebeard-4.7.tar.gz", hash = "sha256:c751a3f924158c288fea89afc25a7151979faf01bf11fdc7be3b858099dfa56d"},
-    {file = "django_treebeard-4.7-py3-none-any.whl", hash = "sha256:787117995ff985d98e6c2b241ef6b9d37fe8ff7051cd7535c283616a0b5b2645"},
+    {file = "django-treebeard-4.7.1.tar.gz", hash = "sha256:846e462904b437155f76e04907ba4e48480716855f88b898df4122bdcfbd6e98"},
+    {file = "django_treebeard-4.7.1-py3-none-any.whl", hash = "sha256:995c7120153ab999898fe3043bbdcd8a0fc77cc106eb94de7350e9d02c885135"},
 ]
 
 [package.dependencies]
@@ -1130,13 +1130,13 @@ files = [
 
 [[package]]
 name = "sortinghat"
-version = "0.19.0"
+version = "0.19.1"
 description = "A tool to manage identities."
 optional = false
 python-versions = ">=3.8,<4.0"
 files = [
-    {file = "sortinghat-0.19.0-py3-none-any.whl", hash = "sha256:3c8b77d4cfdf9070f39a4d2883468c40c1f804a1d1e4a45a31e7d41c447b1451"},
-    {file = "sortinghat-0.19.0.tar.gz", hash = "sha256:27d3db6a19ff92c2f7d1c7377582ce12f8bfa402e3486db24d0669bab7ffc3f9"},
+    {file = "sortinghat-0.19.1-py3-none-any.whl", hash = "sha256:612fcc735af4378dd7ee0ab4107fdcdcd0a7215d7e653347e9553dcd9ec4f8c4"},
+    {file = "sortinghat-0.19.1.tar.gz", hash = "sha256:584143b11c1b4c4a2dbf4947686fa916c52a15b4e63d27659de74b3b3e07c408"},
 ]
 
 [package.dependencies]
