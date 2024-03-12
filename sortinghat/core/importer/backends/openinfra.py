@@ -146,7 +146,8 @@ class OpenInfraIDParser:
             if not individual.enrollments:
                 company = member.get('company', None)
                 if company:
-                    enr = Enrollment(company)
+                    org = Organization(name=company)
+                    enr = Enrollment(org)
                     individual.enrollments.append(enr)
 
             yield individual
