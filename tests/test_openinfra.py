@@ -403,6 +403,7 @@ class TestOpenInfraParser(TestCase):
         self.assertEqual(indiv.identities[1].source, "github")
         self.assertEqual(indiv.identities[1].name, "name surname")
         self.assertEqual(indiv.identities[1].username, "random-gh-user")
+        self.assertEqual(indiv.enrollments[0].organization.name, "MyCompany")
 
         indiv = individuals[1]
         self.assertEqual(indiv.uuid, 136853)
