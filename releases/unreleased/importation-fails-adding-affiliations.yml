@@ -1,0 +1,8 @@
+---
+title: Importation fails adding affiliations
+category: fixed
+author: Jose Javier Merchante <jjmerchante@bitergia.com>
+issue: null
+notes: >
+  Fix a bug related to adding enrollments of members
+  from the company field

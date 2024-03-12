@@ -263,7 +263,7 @@
       "pic":"https:\/\/www.gravatar.com\/avatar\/cd0f6f85db68e8cef64144e2072780dd",
       "membership_type":"None",
       "candidate_profile_id":0,
-      "company":null,
+      "company":"MyCompany",
       "groups":[
         71
       ],
