@@ -1,0 +1,9 @@
+---
+title: OpenInfra importer updated to include more emails
+category: added
+author: Jose Javier Merchante <jjmerchante@bitergia.com>
+issue: null
+notes: >
+  Update the OpenInfra importer to create new identities
+  based on additional email addresses provided through
+  the API.

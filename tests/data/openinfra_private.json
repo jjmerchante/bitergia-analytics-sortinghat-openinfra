@@ -56,6 +56,8 @@
       "candidate_profile_id":0,
       "company":null,
       "email":"email_2@example.com",
+      "second_email":"email_2b@example.com",
+      "third_email":"email_2c@example.com",
       "groups":[
         71
       ],

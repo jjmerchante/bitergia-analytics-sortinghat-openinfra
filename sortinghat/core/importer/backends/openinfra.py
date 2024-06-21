@@ -113,22 +113,29 @@ class OpenInfraIDParser:
             name = f"{member.get('first_name', '')} {member.get('last_name', '')}".strip()
             name = name if name else None
             github_user = member.get('github_user')
-            email = member.get('email')
+            main_email = member.get('email')
+            mail2 = member.get('second_email')
+            mail3 = member.get('third_email')
+            emails = [main_email, mail2, mail3]
+            emails = [e for e in emails if e]
             affiliations = member.get('affiliations', [])
-            if not name and not github_user and not email:
+            if not name and not github_user and not emails:
                 # Skip individuals that can't be identified in SH
                 logger.warning("Skip empty individual")
                 continue
             individual = Individual(uuid=uuid)
             prf = Profile()
-            prf.email = email
+            prf.email = main_email
             prf.name = name
             individual.profile = prf
-            if name or email:
+            for email in emails:
                 idt = Identity(source=self.source, name=name, username=str(uuid), email=email)
                 individual.identities.append(idt)
+            if name and not emails:
+                idt = Identity(source=self.source, name=name, username=str(uuid), email=None)
+                individual.identities.append(idt)
             if github_user:
-                idt = Identity(source='github', name=name, username=github_user, email=email)
+                idt = Identity(source='github', name=name, username=github_user, email=main_email)
                 individual.identities.append(idt)
 
             for aff in affiliations:
